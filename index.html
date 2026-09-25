@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Tap Counter</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#f5f5f7;color:#111;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;min-height:100vh}
+main{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px env(safe-area-inset-bottom)}
+.label{font-size:14px;letter-spacing:.12em;color:#777;font-weight:700}
+#count{font-size:clamp(72px,24vw,150px);line-height:1;font-weight:800;letter-spacing:-.06em;margin:12px 0 34px;text-align:center;word-break:break-all}
+#tap{width:min(88vw,420px);height:min(52vh,320px);min-height:220px;border:0;border-radius:38px;background:#111;color:white;font-size:38px;font-weight:800;box-shadow:0 12px 30px #0002;touch-action:manipulation}
+#tap:active{transform:scale(.98);background:#333}
+.actions{display:flex;gap:12px;margin-top:22px}
+button.secondary{height:52px;padding:0 20px;border:1px solid #d0d0d5;border-radius:16px;background:white;color:#111;font-size:17px;font-weight:650}
+#status{margin-top:16px;font-size:13px;color:#777;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <div class="label">TOTAL TAPS</div>
+  <div id="count" aria-live="polite">0</div>
+  <button id="tap" aria-label="Add one tap">TAP +1</button>
+  <div class="actions">
+    <button id="undo" class="secondary">Undo</button>
+    <button id="reset" class="secondary">Reset</button>
+  </div>
+  <div id="status">Saved automatically on this iPhone</div>
+</main>
+<script>
+const KEY="tapCounterTotal_v1";
+const HISTORY="tapCounterHistory_v1";
+let count=Number(localStorage.getItem(KEY)||0);
+let history=JSON.parse(localStorage.getItem(HISTORY)||"[]");
+const countEl=document.getElementById("count");
+const statusEl=document.getElementById("status");
+
+function render(){countEl.textContent=count.toLocaleString("en-IN");}
+function save(){
+  localStorage.setItem(KEY,String(count));
+  localStorage.setItem(HISTORY,JSON.stringify(history.slice(-100)));
+}
+function tap(){
+  history.push(count);
+  count++;
+  save(); render();
+}
+function undo(){
+  if(!history.length)return;
+  count=history.pop();
+  save(); render();
+}
+function reset(){
+  if(!confirm("Reset the counter to 0?")) return;
+  history.push(count);
+  count=0;
+  save(); render();
+}
+document.getElementById("tap").addEventListener("click",tap);
+document.getElementById("undo").addEventListener("click",undo);
+document.getElementById("reset").addEventListener("click",reset);
+render();
+</script>
+</body>
+</html>
